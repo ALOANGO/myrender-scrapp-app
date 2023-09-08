@@ -3,6 +3,8 @@ import pandas as pd
 from dash import Dash, dash_table, dcc, html, Input, Output, State
 import plotly.express as px
 from scraping_dataframe import fincaraiz
+import openpyxl
+
 
 
 
