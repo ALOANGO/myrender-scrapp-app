@@ -95,8 +95,12 @@ def generate_table(n_clicks):
     prevent_initial_call=True)
 
 
-def download_data(n_clicks, ):
-   return dcc.send_data_frame(df.to_excel, "houses_antioquia.csv")
+def download_data(n_clicks):
+   if n_clicks is None:
+     return None 
+   
+   excel_data = df.to_excel("houses_antioquia.xlsx", index=False)
+   return dcc.send_file("houses_antioquia.xlsx")
 
 
 
