@@ -11,19 +11,20 @@ from scraping_dataframe import fincaraiz
 
 
 #COORDENADAS CALI Y JAMUNDI
-cali=[[-76.59027692154969,3.535311581094419],[-76.48934003190125,3.3689308955117525]]
-jamundi=[[-76.5766830444336,3.4943666458129883],[-76.502929,3.2008246]]
-#DATAFRAME CASAS
-dfcalihouse= fincaraiz("house",cali)
-dfjamundihouse=fincaraiz("house",jamundi)
-dataframehouses=pd.concat([dfcalihouse,dfjamundihouse])
-#DATAFRAME APARTAMENTOS
-dfcaliapartment= fincaraiz("apartment",cali)
-dfjamundiapartment=fincaraiz("apartment",jamundi)
-dataframeapartment=pd.concat([dfcaliapartment,dfjamundiapartment])
-#CONCATENAR DATAFRAME CASAS Y APTOS
-df= pd.concat([dataframehouses,dataframeapartment])
+antioquia=[[-75.7751988,7.0938077],[-75.3140647788699,5.6973074]]
 
+#DATAFRAME CASAS
+dfantioquiahouse= fincaraiz("house",antioquia)
+
+
+#DATAFRAME APARTAMENTOS
+dfantioquiapartment= fincaraiz("apartment",antioquia)
+
+
+#CONCATENAR DATAFRAME CASAS Y APTOS
+df= pd.concat([dfantioquiahouse,dfantioquiapartment])
+df.drop_duplicates(['idpropiedad'], inplace=True)
+df.reset_index(drop=True, inplace=True)
 #1- inicializo la app
 
 
@@ -35,7 +36,7 @@ server = app.server
 
 
 generate_button = html.Button("Generar tabla", id="load-button")
-download_button =html.Button("Download Excel", id="btn_xlsx")
+download_button =html.Button("Download Excel", style={"marginTop": 20})
 tabla_container=html.Div(id="table-container")
 #download_button = html.Button("Download Tabla", style={"marginTop": 20})
 
@@ -50,8 +51,8 @@ app.layout = html.Div(
         html.H2('WEB SCRAPING VIVIENDAS EN VENTA DE CALI Y JAMUNDI', style={"marginBottom": 20}), 
          
         generate_button, 
+        download_component,
         download_button,
-        dcc.Download(id="download-dataframe-xlsx"),
         tabla_container
         
         
@@ -88,13 +89,14 @@ def generate_table(n_clicks):
     #return dtable, download_link
 
 @app.callback(
-    Output("download-dataframe-xlsx", "data"),
-    Input("btn_xlsx", "n_clicks"),
+    Output(download_component, "data"),
+    Input(download_button, "n_clicks"),
+   
     prevent_initial_call=True)
 
 
-def func(n_clicks):
-    return dcc.send_data_frame(df.to_excel, "mydf.xlsx", sheet_name="Sheet_name_1")
+def download_data(n_clicks):
+    return dcc.send_data_frame(df.to_excel, "houses_medellin.csv")
 
 
 
