@@ -48,7 +48,7 @@ download_component = dcc.Download()
 
 app.layout = html.Div(
     [
-        html.H2('WEB SCRAPING VIVIENDAS EN VENTA DE CALI Y JAMUNDI', style={"marginBottom": 20}), 
+        html.H2('WEB SCRAPING VIVIENDAS EN VENTA EN ANTIOQUIA', style={"marginBottom": 20}), 
          
         generate_button, 
         download_component,
@@ -95,8 +95,8 @@ def generate_table(n_clicks):
     prevent_initial_call=True)
 
 
-def download_data(n_clicks):
-    return dcc.send_data_frame(df.to_excel, "houses_medellin.csv")
+def download_data(n_clicks, ):
+   return dcc.send_data_frame(df.to_excel, "houses_antioquia.csv")
 
 
 
