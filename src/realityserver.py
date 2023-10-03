@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 import re
 from datetime import date
 import pandas as pd
+import lxml
 
 def realityserver():
     #Crear listas
@@ -72,7 +73,7 @@ def realityserver():
 
         if r.status_code==200:
 
-            soup=BeautifulSoup(r.text)
+            soup=BeautifulSoup(r.text, lxml)
 
 
             #Span principal es donde esta todo el contenido de la pagina
@@ -95,7 +96,7 @@ def realityserver():
       try:
 
           pagina=requests.get(e)
-          pagina_secc=BeautifulSoup(pagina.text)
+          pagina_secc=BeautifulSoup(pagina.text, lxml)
 
 
           #Extraer area, cuartos, antigue, piso garaje, baños, estrato, ciudad, admon y zona

@@ -11,6 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import date
 import pandas as pd
+import lxml
 
 def lonja():
 
@@ -51,7 +52,7 @@ def lonja():
           r=requests.get(url)
 
           if r.status_code==200:
-              soup=BeautifulSoup(r.text)
+              soup=BeautifulSoup(r.text, 'lxml')
 
               anuncios=soup.find_all("div", class_="listing-item")
               ul=soup.find_all("ul", class_="listing-details")
@@ -100,7 +101,7 @@ def lonja():
                     longitud.append("null")
                     latitud.append("null")
                     cada_anuncio=requests.get("https://lalonjapropiedadraiz.com"+(e.find('a').get('href')))
-                    soup_individual=BeautifulSoup(cada_anuncio.text)
+                    soup_individual=BeautifulSoup(cada_anuncio.text, 'lxml')
                     descripcion.append(soup_individual.find('p', class_='resumen').text.strip())
 
 
