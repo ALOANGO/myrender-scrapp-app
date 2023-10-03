@@ -7,6 +7,8 @@ from metrocuadrado import metrocuadrado
 from realityserver import realityserver
 from lonja import lonja
 import openpyxl
+from datetime import date
+from bs4 import BeautifulSoup
 
 
 
