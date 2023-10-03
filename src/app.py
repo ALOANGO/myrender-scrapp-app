@@ -2,31 +2,28 @@ import dash
 import pandas as pd
 from dash import Dash, dash_table, dcc, html, Input, Output, State
 import plotly.express as px
-from scraping_dataframe import fincaraiz
+from fincaprueba import fincaraiz
+from metrocuadrado import metrocuadrado
+from realityserver import realityserver
+from lonja import lonja
 import openpyxl
 
 
 
+#EXTRAER DATA WEB SCRAPP
+df1=fincaraiz()
+df2=metrocuadrado()
+df3=realityserver()
+df4=lonja()
+data_historica=pd.read_csv("data_contatenada.csv", sep=",")
 
 
+#CONCATENAR DATA
+df_total=pd.concat([data_historica,df1,df2,df3, df4])
+df_total.drop_duplicates(['idpropiedad'], inplace=True)
+df_total.reset_index(drop=True, inplace=True)
 
-
-
-#COORDENADAS CALI Y JAMUNDI
-antioquia=[[-75.7751988,7.0938077],[-75.3140647788699,5.6973074]]
-
-#DATAFRAME CASAS
-dfantioquiahouse= fincaraiz("house",antioquia)
-
-
-#DATAFRAME APARTAMENTOS
-dfantioquiapartment= fincaraiz("apartment",antioquia)
-
-
-#CONCATENAR DATAFRAME CASAS Y APTOS
-df= pd.concat([dfantioquiahouse,dfantioquiapartment])
-df.drop_duplicates(['idpropiedad'], inplace=True)
-df.reset_index(drop=True, inplace=True)
+df_total.to_csv("data_contatenada.csv", index=False)
 #1- inicializo la app
 
 
@@ -40,9 +37,12 @@ server = app.server
 generate_button = html.Button("Generar tabla", id="load-button")
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 tabla_container=html.Div(id="table-container")
-#download_button = html.Button("Download Tabla", style={"marginTop": 20})
-
 download_component = dcc.Download()
+filtro1=dcc.Dropdown(id='mifiltro',
+                     options={'value':'fuente'},
+                     placeholder='Escoge la fuente' ,
+                     multi=True, 
+                     style={'width': "40%"}   )                                                                                         
 
 
 
@@ -50,17 +50,22 @@ download_component = dcc.Download()
 
 app.layout = html.Div(
     [
-        html.H2('WEB SCRAPING VIVIENDAS EN VENTA EN ANTIOQUIA', style={"marginBottom": 20}), 
+        html.H1('MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}), 
+        html.Div('''Fincaraiz - Metrocuadrado - Lonja - Realityserver'''),
+        html.Div(f'''Tamaño de la tabla: {df_total.shape}'''),
          
         generate_button, 
         download_component,
         download_button,
-        tabla_container
+        tabla_container,
+        #filtro1
         
         
     ]
 )
 
+
+#___________________________________________________________________________________________________________________
 #4-callbacks (juntar componentes con los datos)
 
 @app.callback(
@@ -73,9 +78,11 @@ def generate_table(n_clicks):
         return dash.no_update  # No actualiza la salida si aún no se ha hecho click
     
     dtable = dash_table.DataTable(id='datascraping',
-        columns=[{"name": i, "id": i} for i in sorted(df.columns)],
-        data=df.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in (df_total.columns)],
+        data=df_total.to_dict('records'),
         sort_action="native",
+        sort_mode="multi",
+        row_selectable="multi",
         filter_action="native",
         style_cell={"textAlign":"left", 
                     'whiteSpace': 'normal',
@@ -86,6 +93,8 @@ def generate_table(n_clicks):
         style_cell_conditional=[{'if':{'column_id':'descripcion'},'width':'10%'}],
         page_size=10)
     return dtable
+
+
 
 
     #return dtable, download_link
@@ -101,7 +110,7 @@ def download_data(n_clicks):
    if n_clicks is None:
      return None 
    
-   excel_data = df.to_excel("houses_antioquia.xlsx", index=False)
+   excel_data = df_total.to_excel("houses_antioquia.xlsx", index=False)
    return dcc.send_file("houses_antioquia.xlsx")
 
 
