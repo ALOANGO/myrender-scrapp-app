@@ -100,7 +100,7 @@ def lonja():
                     longitud.append("null")
                     latitud.append("null")
                     cada_anuncio=requests.get("https://lalonjapropiedadraiz.com"+(e.find('a').get('href')))
-                    soup_individual=BeautifulSoup(cada_anuncio.text, 'lxml')
+                    soup_individual=BeautifulSoup(cada_anuncio.text)
                     descripcion.append(soup_individual.find('p', class_='resumen').text.strip())
 
 
