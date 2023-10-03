@@ -51,7 +51,7 @@ def lonja():
           r=requests.get(url)
 
           if r.status_code==200:
-              soup=BeautifulSoup(r.text, 'lxml')
+              soup=BeautifulSoup(r.text)
 
               anuncios=soup.find_all("div", class_="listing-item")
               ul=soup.find_all("ul", class_="listing-details")

@@ -72,7 +72,7 @@ def realityserver():
 
         if r.status_code==200:
 
-            soup=BeautifulSoup(r.text, 'lxml')
+            soup=BeautifulSoup(r.text)
 
 
             #Span principal es donde esta todo el contenido de la pagina
@@ -95,7 +95,7 @@ def realityserver():
       try:
 
           pagina=requests.get(e)
-          pagina_secc=BeautifulSoup(pagina.text, 'lxml')
+          pagina_secc=BeautifulSoup(pagina.text)
 
 
           #Extraer area, cuartos, antigue, piso garaje, baños, estrato, ciudad, admon y zona
