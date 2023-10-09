@@ -233,7 +233,7 @@ def fincaraiz():
                                   consolidado["zona"]= consolidado["zona"].str.strip("Zona ")
                                   consolidado[["longitud","latitud"]]= consolidado["punto"].str.split(" ", expand=True)
                                   consolidado[["longitud","latitud"]]=round((consolidado[["longitud","latitud"]].astype(float64)),2)
-                                  consolidado["precio"]=consolidado["precio"].astype(float64)
+                                  consolidado["precio"]=pd.to_numeric(consolidado["precio"], errors='ignore')
                                   consolidado["aream2"]=consolidado["aream2"].astype(float64)
                                   consolidado["idpropiedad"]=consolidado["idpropiedad"].astype(str)
                                   consolidado["direccion"]= consolidado["direccion"].str.strip("{ }")
@@ -265,10 +265,22 @@ def fincaraiz():
                       #DATAFRAME APARTAMENTOS
                       dfantioquiapartment= scrap_fincaraiz("apartment",antioquia)
 
+                      #DATAFRAME LOTES
+                      dfantioquialote= scrap_fincaraiz("lot",antioquia)
+
+                      #DATAFRAME LOCALES
+                      dfantioquialocal= scrap_fincaraiz("commercial",antioquia)
+
+
+                      #DATAFRAME BODEGAS
+                      dfantioquiabodega= scrap_fincaraiz("warehouse",antioquia)
+
+                      #DATAFRAME FINCAS
+                      dfantioquiafinca= scrap_fincaraiz("farm",antioquia)
 
                       #CONCATENAR DATAFRAME CASAS Y APTOS
 
-                      dfa= pd.concat([dfantioquiahouse,dfantioquiapartment])
+                      dfa= pd.concat([dfantioquiahouse,dfantioquiapartment, dfantioquialote, dfantioquialocal,dfantioquiabodega, dfantioquiafinca])
                       dfa.drop_duplicates(['idpropiedad'], inplace=True)
                       dfa.reset_index(drop=True, inplace=True)
 

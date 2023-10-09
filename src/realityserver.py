@@ -15,198 +15,223 @@ import pandas as pd
 import lxml
 
 def realityserver():
-    #Crear listas
 
-    aream2=[]
-    cuartos=[]
-    antiguedad=[]
-    piso=[]
-    garajes=[]
-    toilets=[]
-    estrato=[]
-    ciudad=[]
-    admon=[]
-    zona=[]
-    barrio=[]
-    tipopropiedad=[]
-    idpropiedad=[]
-    precio=[]
-    enunciado=[]
-    descripcion=[]
-    nombrevendedor=[]
-    punto=[]
-    links=[]
-    oferta=[]
-    companyname=[]
-    apellidovendedor=[]
-    tipocliente=[]
-    depto=[]
-    direccion=[]
-    fecha=[]
-    fuente=[]
-    longitud=[]
-    latitud=[]
+        def realityserver_scrap(num):
+            #Crear listas
 
-    # Crear diccionario para mapear los td con sus respectivas listas
-    td_to_lista = {
-        'M2 Area Construida': aream2,
-        '# de Alcobas': cuartos,
-        'Año de construcción': antiguedad,
-        '# de Niveles ': piso,
-        '# de Parqueaderos': garajes,
-        '# de Baños Completos': toilets,
-        'Estrato': estrato,
-        'Ciudad': ciudad,
-        'Administración $': admon,
-        'Zona': zona}
+            aream2=[]
+            cuartos=[]
+            antiguedad=[]
+            piso=[]
+            garajes=[]
+            toilets=[]
+            estrato=[]
+            ciudad=[]
+            admon=[]
+            zona=[]
+            barrio=[]
+            tipopropiedad=[]
+            idpropiedad=[]
+            precio=[]
+            enunciado=[]
+            descripcion=[]
+            nombrevendedor=[]
+            punto=[]
+            links=[]
+            oferta=[]
+            companyname=[]
+            apellidovendedor=[]
+            tipocliente=[]
+            depto=[]
+            direccion=[]
+            fecha=[]
+            fuente=[]
+            longitud=[]
+            latitud=[]
 
-
-    #Recorrer cada pagina
-    for i in range(1,11):
+            # Crear diccionario para mapear los td con sus respectivas listas
+            td_to_lista = {
+                'M2 Area Construida': aream2,
+                '# de Alcobas': cuartos,
+                'Año de construcción': antiguedad,
+                '# de Niveles ': piso,
+                '# de Parqueaderos': garajes,
+                '# de Baños Completos': toilets,
+                'Estrato': estrato,
+                'Ciudad': ciudad,
+                'Administración $': admon,
+                'Zona': zona}
 
 
-
-        url=f"http://colombia.realtyserver.com/MainListingSearch?search_map_pointlist=&search_page=1&search_sort_field=price_current--asc&search_limit=10&results_only=true&table=mls&getData=false&zoomLevel=7&mapOnlySearch=false&searchString=&region={i}&district=&map_area=&bedrooms=&bathrooms=&property_type=4&property_type=1&price_current=&sqft_total=&parking_spaces="
-        headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.41"}
-
-        r=requests.get(url, headers=headers)
-
-        if r.status_code==200:
-
-            soup=BeautifulSoup(r.text, 'lxml')
-
-
-            #Span principal es donde esta todo el contenido de la pagina
-
-            span_principal=soup.find_all('div', class_='column_2')
-
-
-            #Extraer links de cada aviso
-            for element in span_principal:
-                mls_text = element.find('span', class_='small').text
-                links.append("http://colombia.realtyserver.com/ViewDetail?id="+mls_text.split('MLS # : ')[1].replace("\r\n\t\t", ""))
-
-        else:
-            print(f"No se encuentra la consulta. Error: {r.status_code} ")
+            #Recorrer cada pagina
+            for i in range(1,11):
 
 
 
+                url=f"http://colombia.realtyserver.com/MainListingSearch?search_map_pointlist=&search_page=1&search_sort_field=price_current--asc&search_limit=10&results_only=true&table=mls&getData=false&zoomLevel=7&mapOnlySearch=false&searchString=&region={i}&district=&map_area=&bedrooms=&bathrooms=&property_type={num}&price_current=&sqft_total=&parking_spaces="
+                headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.41"}
 
-    for e in links:
-      try:
+                r=requests.get(url, headers=headers)
 
-          pagina=requests.get(e)
-          pagina_secc=BeautifulSoup(pagina.text, 'lxml')
+                if r.status_code==200:
+
+                    soup=BeautifulSoup(r.text, 'lxml')
 
 
-          #Extraer area, cuartos, antigue, piso garaje, baños, estrato, ciudad, admon y zona
+                    #Span principal es donde esta todo el contenido de la pagina
 
-          for label, lista_name in td_to_lista.items():
-                  td = pagina_secc.find('td', string=label)
-                  if td:
-                      # Encontrar el siguiente td con class 'detailData' y obtener su contenido
-                      contenido = td.find_next('td', class_='detailData').text.strip()
-                      lista_name.append(contenido)
+                    span_principal=soup.find_all('div', class_='column_2')
+
+
+                    #Extraer links de cada aviso
+                    for element in span_principal:
+                        mls_text = element.find('span', class_='small').text
+                        links.append("http://colombia.realtyserver.com/ViewDetail?id="+mls_text.split('MLS # : ')[1].replace("\r\n\t\t", ""))
+
+                else:
+                    print(f"No se encuentra la consulta. Error: {r.status_code} ")
+
+
+
+
+            for e in links:
+              try:
+
+                  pagina=requests.get(e)
+                  pagina_secc=BeautifulSoup(pagina.text, 'lxml')
+
+
+                  #Extraer area, cuartos, antigue, piso garaje, baños, estrato, ciudad, admon y zona
+
+                  for label, lista_name in td_to_lista.items():
+                          td = pagina_secc.find('td', string=label)
+                          if td:
+                              # Encontrar el siguiente td con class 'detailData' y obtener su contenido
+                              contenido = td.find_next('td', class_='detailData').text.strip()
+                              lista_name.append(contenido)
+                          else:
+                            lista_name.append('null')
+
+
+
+                  #Extraer Barrio, tipopropiedad ,idpropiedad
+                  h2 = pagina_secc.find('h2')
+
+                  # Verificar si la etiqueta <h2> existe
+                  if h2:
+                      # Obtener todas las líneas de texto dentro de la etiqueta <h2>
+                      lineas = h2.stripped_strings
+
+                      # Convertir las líneas en una lista
+                      lineas_lista = list(lineas)
+
+                      if len(lineas_lista) >= 3:
+                          barrio.append(lineas_lista[0])
+                          tipopropiedad.append(lineas_lista[1])
+                          idpropiedad.append(lineas_lista[2])
                   else:
-                    lista_name.append('null')
+                      print("No se encontró la etiqueta <h2>")
+
+
+                  # Extraer el contenido de la etiqueta <h1> con la clase "price"
+                  precio_h1 = pagina_secc.find('h1', class_='price')
+                  precio.append(precio_h1.text.strip().replace("Precio COP ", "") if precio_h1 else None)
+
+
+                  # Extraer el titulo
+                  enunciado.append(pagina_secc.select("#property_title h1")[1].text.replace('\xa0', ""))
+
+                  #Extraer descripcion
+                  descripcion.append(pagina_secc.select_one("#property_detail p").text.strip())
+
+                  # Extraer nombre vendedor
+                  nombrevendedor.append(pagina_secc.find('div', class_='property_agent').text.strip().replace("Listado por\n", "").replace('\r\n\t\t', "").replace("t\t\t", ""))
+
+                  # Extraer geoposicion
+                  geopocition= re.findall(r"[-+]?\d*\.\d+|\d+", (pagina_secc.find_all("script")[12].text))[:2]
+                  punto.append(geopocition[1]+" "+geopocition[0])
 
 
 
-          #Extraer Barrio, tipopropiedad ,idpropiedad
-          h2 = pagina_secc.find('h2')
+                  oferta.append("VENTA")
+                  companyname.append("null")
+                  apellidovendedor.append("null")
+                  tipocliente.append("PRIVATE")
+                  depto.append("Antioquia")
+                  fecha.append(date.today())
+                  longitud.append(geopocition[1])
+                  latitud.append(geopocition[0])
+                  fuente.append("Realityserver")
 
-          # Verificar si la etiqueta <h2> existe
-          if h2:
-              # Obtener todas las líneas de texto dentro de la etiqueta <h2>
-              lineas = h2.stripped_strings
+              except:
+                  punto.append("null")
+                  oferta.append("VENTA")
+                  companyname.append("null")
+                  apellidovendedor.append("null")
+                  tipocliente.append("PRIVATE")
+                  fuente.append("Realityserver")
+                  fecha.append(date.today())
+                  longitud.append("null")
+                  latitud.append("null")
+                  depto.append("Antioquia")
+                  direccion.append(lineas_lista[0])
 
-              # Convertir las líneas en una lista
-              lineas_lista = list(lineas)
+            #Crear diccionario para el dataframe
+            direccion=barrio
 
-              if len(lineas_lista) >= 3:
-                  barrio.append(lineas_lista[0])
-                  tipopropiedad.append(lineas_lista[1])
-                  idpropiedad.append(lineas_lista[2])
-          else:
-              print("No se encontró la etiqueta <h2>")
+            df={  "aream2":aream2,
+                  "cuartos":cuartos,
+                  "antiguedad":antiguedad,
+                  "piso":piso,
+                  "enunciado":enunciado,
+                  "oferta":oferta,
+                  "garajes":garajes,
+                  "toilets":toilets,
+                  "estrato":estrato,
+                  "precio":precio,
+                  "companyname":companyname,
+                  "nombrevendedor":nombrevendedor,
+                  "apellidovendedor":apellidovendedor,
+                  "tipocliente":tipocliente,
+                  "tipopropiedad":tipopropiedad,
+                  "barrio":barrio,
+                  "ciudad":ciudad,
+                  "admon":admon,
+                  "depto":depto,
+                  "direccion":direccion,
+                  "zona":zona,
+                  "idpropiedad":idpropiedad,
+                  "punto":punto,
+                  "longitud":longitud,
+                  "latitud":latitud,
+                  "descripcion":descripcion,
+                  "fecha":fecha,
+                  "links":links,
+                  "fuente":fuente}
+
+            dataframe_total= pd.DataFrame(df)
+            dataframe_total["precio"]=pd.to_numeric(dataframe_total["precio"], errors='ignore')
+            
+
+            return dataframe_total
 
 
-          # Extraer el contenido de la etiqueta <h1> con la clase "price"
-          precio_h1 = pagina_secc.find('h1', class_='price')
-          precio.append(precio_h1.text.strip().replace("Precio COP ", "") if precio_h1 else None)
+        tipo_prop=[1,4,11,12]
+        dfs=[]
+
+        for n in tipo_prop :
+          try:
+            dfs.append(realityserver_scrap(n))
+          except:
+            continue
 
 
-          # Extraer el titulo
-          enunciado.append(pagina_secc.select("#property_title h1")[1].text.replace('\xa0', ""))
-
-          #Extraer descripcion
-          descripcion.append(pagina_secc.select_one("#property_detail p").text.strip())
-
-          # Extraer nombre vendedor
-          nombrevendedor.append(pagina_secc.find('div', class_='property_agent').text.strip().replace("Listado por\n", "").replace('\r\n\t\t', "").replace("t\t\t", ""))
-
-          # Extraer geoposicion
-          geopocition= re.findall(r"[-+]?\d*\.\d+|\d+", (pagina_secc.find_all("script")[12].text))[:2]
-          punto.append(geopocition[1]+" "+geopocition[0])
+        #Concatenar tablas extraidas
+        dfdefinit=pd.concat(dfs, ignore_index=True)
 
 
+        #eliminar duplicados de columna propid
+        dfdefinit.drop_duplicates(['idpropiedad'], inplace=True)
+        dfdefinit.reset_index(drop=True, inplace=True)
 
-          oferta.append("VENTA")
-          companyname.append("null")
-          apellidovendedor.append("null")
-          tipocliente.append("PRIVATE")
-          depto.append("Antioquia")
-          fecha.append(date.today())
-          longitud.append(geopocition[1])
-          latitud.append(geopocition[0])
-          fuente.append("Realityserver")
-
-      except:
-          punto.append("null")
-          oferta.append("VENTA")
-          companyname.append("null")
-          apellidovendedor.append("null")
-          tipocliente.append("PRIVATE")
-          fuente.append("Realityserver")
-          fecha.append(date.today())
-          longitud.append("null")
-          latitud.append("null")
-          depto.append("Antioquia")
-          direccion.append(lineas_lista[0])
-
-    #Crear diccionario para el dataframe
-    direccion=barrio
-
-    df={  "aream2":aream2,
-          "cuartos":cuartos,
-          "antiguedad":antiguedad,
-          "piso":piso,
-          "enunciado":enunciado,
-          "oferta":oferta,
-          "garajes":garajes,
-          "toilets":toilets,
-          "estrato":estrato,
-          "precio":precio,
-          "companyname":companyname,
-          "nombrevendedor":nombrevendedor,
-          "apellidovendedor":apellidovendedor,
-          "tipocliente":tipocliente,
-          "tipopropiedad":tipopropiedad,
-          "barrio":barrio,
-          "ciudad":ciudad,
-          "admon":admon,
-          "depto":depto,
-          "direccion":direccion,
-          "zona":zona,
-          "idpropiedad":idpropiedad,
-          "punto":punto,
-          "longitud":longitud,
-          "latitud":latitud,
-          "descripcion":descripcion,
-          "fecha":fecha,
-          "links":links,
-          "fuente":fuente}
-
-    dataframe_total= pd.DataFrame(df)
-
-    return dataframe_total
+        return dfdefinit

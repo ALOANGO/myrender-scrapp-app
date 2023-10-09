@@ -13,10 +13,10 @@ from datetime import date
 
 def metrocuadrado ():
 
-              def metrocuadrado_scrap(ciudad):
+              def metrocuadrado_scrap(ciudad, tipo_p):
 
                         # URL de la solicitud
-                        url = f"https://www.metrocuadrado.com/rest-search/search?realEstateBusinessList=venta&city={ciudad}&realEstateTypeList=apartamento,casa&from=0&size=50"
+                        url = f"https://www.metrocuadrado.com/rest-search/search?realEstateBusinessList=venta&city={ciudad}&realEstateTypeList={tipo_p}&from=0&size=50"
                         headers={'X-Api-Key': 'P1MfFHfQMOtL16Zpg36NcntJYCLFm8FqFfudnavl'}
                         r=requests.get(url, headers=headers)
 
@@ -134,19 +134,22 @@ def metrocuadrado ():
                               "fuente":fuente}
 
                         dfconsolidado=pd.DataFrame(df)
+                        dfconsolidado["precio"]=pd.to_numeric(dfconsolidado["precio"], errors='ignore')
+                        
 
                         #Organizar columna de link
                         dfconsolidado["links"]="https://www.metrocuadrado.com"+dfconsolidado.descripcion
 
                         return dfconsolidado
 
-
               cities=["Medellin",	"Bello","Itagui",	"Envigado",	"Sabaneta",	"Estrella",	"Caldas",	"Copacabana",	"Girardota",	"Barbosa",	"Rionegro",	"Viboral",	"Retiro",	"Ceja",	"Marinilla",	"Penol",	"Guatape",	"Vicente",	"union",	"Guarne",	"Cocorna",	"Apartado",	"Turbo",	"Carepa",	"Chigorodo",	"Necocli",	"Arboletes",]
+              tipo_prop=['apartamento','casa','oficina','finca','bodega','local%20comercial','lote%20o%20casalote']
               dfs=[]
 
-              for c in cities:
+              for c in cities :
                 try:
-                 dfs.append(metrocuadrado_scrap(c))
+                 for  s in tipo_prop:
+                   dfs.append(metrocuadrado_scrap(c,s))
                 except:
                   continue
 
