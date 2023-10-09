@@ -15,7 +15,7 @@ import re
 import os
 
 # Cambia al directorio donde se encuentra el script
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 
@@ -90,7 +90,8 @@ app.layout =dbc.Container([
 
             ],justify="between", className='mt-3 mb-4') ,
 
-            dtable  
+            dtable,
+            tabla_container  
             
             ])
 
