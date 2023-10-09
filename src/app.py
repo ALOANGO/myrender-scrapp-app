@@ -15,7 +15,7 @@ import re
 import os
 
 # Cambia al directorio donde se encuentra el script
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 
@@ -179,7 +179,11 @@ def download_data(n_clicks):
      return None 
    
    excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
-   return dcc.send_file("houses_antioquia.xlsx")
+   # Abrir el archivo recién creado
+   with open("houses_antioquia.xlsx", "rb") as excel_file:
+        file_content = excel_file.read()
+
+   return dcc.send_bytes(file_content, filename="houses_antioquia.xlsx")
 
 
 
