@@ -22,12 +22,12 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 data_historica=pd.read_csv("data_contatenada.csv", sep=',')
 
-
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
 #1- inicializo la app
-app= dash.Dash()
-server = app.server
+#app= dash.Dash()
+#server = app.server
 
 
 # #2- creo componentes ( la tabla, boton upload, boton download)
@@ -126,61 +126,61 @@ def update_dropdown_options(tipop_v, fuent_v, row_v):
 
 
 
-# @app.callback(
-#     Output('datascraping', "children"),
-#     Input("actualiza-button", "n_clicks"))
+@app.callback(
+    Output('datascraping', "children"),
+    Input("actualiza-button", "n_clicks"))
 
-# def actualiza_table(n_clicks):
+def actualiza_table(n_clicks):
 
-#     if n_clicks is None:
-#         return dash.no_update  # No actualiza la salida si aún no se ha hecho click
+    if n_clicks is None:
+        return dash.no_update  # No actualiza la salida si aún no se ha hecho click
     
-#     #EXTRAER DATA WEB SCRAPP
-#     df1=fincaraiz()
-#     df2=metrocuadrado()
-#     df3=realityserver()
-#     df4=lonja()
+    #EXTRAER DATA WEB SCRAPP
+    df1=fincaraiz()
+    df2=metrocuadrado()
+    df3=realityserver()
+    df4=lonja()
     
 
 
-#     #CONCATENAR DATA
-#     df_total=pd.concat([data_historica,df1,df2,df3, df4])
-#     df_total.drop_duplicates(['idpropiedad'], inplace=True)
-#     df_total.reset_index(drop=True, inplace=True)
+    #CONCATENAR DATA
+    df_total=pd.concat([data_historica,df1,df2,df3, df4])
+    df_total.drop_duplicates(['idpropiedad'], inplace=True)
+    df_total.reset_index(drop=True, inplace=True)
 
-#     def format_currency(value):
-#         try:
-#             return '${:,.0f}'.format(float(value))
-#         except (ValueError, TypeError):
-#             return value  # Devuelve el valor original si no se puede convertir a un número
+    def format_currency(value):
+        try:
+            return '${:,.0f}'.format(float(value))
+        except (ValueError, TypeError):
+            return value  # Devuelve el valor original si no se puede convertir a un número
         
-#     df_total["precio"]=df_total["precio"].apply(format_currency)
-#     df_total["tipopropiedad"]=df_total["tipopropiedad"].str.strip()
+    df_total["precio"]=df_total["precio"].apply(format_currency)
+    df_total["tipopropiedad"]=df_total["tipopropiedad"].str.strip()
 
-#     df_total.to_csv("data_contatenada.csv", index=False)
+    df_total.to_csv("data_contatenada.csv", index=False)
     
 
-#     return df_total.to_dict('records')
+    return df_total.to_dict('records')
 
 
 
 
     #return dtable, download_link
 
-@app.callback(
-    Output(download_component, "data"),
-    Input(download_button, "n_clicks"),
+# @app.callback(
+#     Output(download_component, "data"),
+#     Input(download_button, "n_clicks"),
    
-    prevent_initial_call=True)
+#     prevent_initial_call=True)
 
 
-def download_data(n_clicks):
-   if n_clicks is None:
-     return None 
+# def download_data(n_clicks):
+#    if n_clicks is None:
+#      return None 
    
-   excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
-   
-   return dcc.send_file("houses_antioquia.xlsx")
+#    excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
+
+#    return dcc.send_file("houses_antioquia.xlsx")
 
 
 
