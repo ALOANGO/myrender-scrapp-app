@@ -22,12 +22,11 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 data_historica=pd.read_csv("data_contatenada.csv", sep=',')
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
 #1- inicializo la app
-#app= dash.Dash()
-#server = app.server
+app= dash.Dash()
+server = app.server
 
 
 # #2- creo componentes ( la tabla, boton upload, boton download)
@@ -41,14 +40,14 @@ download_component = dcc.Download()
 #                      options={'value':'fuente'},
 #                      placeholder='Escoge la fuente' ,
 #                      multi=True, 
-#                      style={'width': "40%"}   )    
-cantidad= dcc.Markdown(id="cantidad-markdown", style={"text-align": "center"})
+#                      style={'width': "40%"}   )     
 
 dtable = dash_table.DataTable(id='datascraping',
         columns=[{"name": i, "id": i} for i in (data_historica.columns)],
         data=data_historica.to_dict('records'),
         sort_action="native",
         sort_mode="multi",
+        row_selectable="multi",
         filter_action="native",
         style_cell={"textAlign":"left", 
                     'whiteSpace': 'normal',
@@ -64,74 +63,39 @@ dtable = dash_table.DataTable(id='datascraping',
 
 # #3-Mete los componentes a la pagina (layout)
 
-app.layout =dbc.Container([ 
-    
-        dcc.Markdown('# MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}), 
-        cantidad,
+app.layout = html.Div(
+    [
+        html.H1('MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}), 
+        html.Div(f'''Fincaraiz {(data_historica['fuente']=='Fincaraiz').sum()} - 
+                     Metrocuadrado {(data_historica['fuente']=='Metrocuadrado').sum()} - 
+                     Lonja {(data_historica['fuente']=='Lonja').sum()} - 
+                     Realityserver {(data_historica['fuente']=='Realityserver').sum()}'''),
+        html.Div(f'''Tamaño de la tabla: {data_historica.shape}'''),
          
-        dbc.Label("Numero de filas"),
-        row_drop := dcc.Dropdown(value=10, clearable=False, style={'width':'35%'},
-                             options=[10, 25, 50, 100]),
-
+        
         download_component,
         download_button,
-        actualiza_button, 
-                           
-                       
-
-        dbc.Row([
-            dbc.Col([
-                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(data_historica.tipopropiedad.unique())])
-            ], style={'width': "40%"}),
-
-            dbc.Col([
-            fuente_drop := dcc.Dropdown([x for x in sorted(data_historica.fuente.unique())], multi=True)
-            ], style={'width': "40%"}),
-
-            ],justify="between", className='mt-3 mb-4') ,
-
-            dtable,
-            tabla_container  
-            
-            ])
+        actualiza_button,
+        tabla_container,
+        dtable,
+        #filtro1
+        
+        
+    ]
+)
 
 
 # #___________________________________________________________________________________________________________________
 # #4-callbacks (juntar componentes con los datos)
 
-@app.callback(
-    Output(dtable, "data"),
-    Output(dtable, 'page_size'),
-    Output("cantidad-markdown", 'children'),
-
-    Input(tipopropiedad_drop, 'value'),
-    Input(fuente_drop, 'value'),
-    Input(row_drop, 'value')
-)
-
-def update_dropdown_options(tipop_v, fuent_v, row_v):
-    copia_data= data_historica.copy()
-
-    if tipop_v:
-        copia_data = copia_data[copia_data.tipopropiedad==tipop_v]
-    if fuent_v:
-        copia_data = copia_data[copia_data.fuente.isin(fuent_v)]
-
-    cantidad_text= f'''REGISTROS: {copia_data.shape}'''
-
-    return copia_data.to_dict('records'), row_v, cantidad_text
-
-
-
-
-
 
 @app.callback(
-    Output('datascraping', "children"),
+    Output("table-container", "children"),
     Input("actualiza-button", "n_clicks"))
 
 def actualiza_table(n_clicks):
 
+    
     if n_clicks is None:
         return dash.no_update  # No actualiza la salida si aún no se ha hecho click
     
@@ -167,21 +131,19 @@ def actualiza_table(n_clicks):
 
     #return dtable, download_link
 
-# @app.callback(
-#     Output(download_component, "data"),
-#     Input(download_button, "n_clicks"),
+@app.callback(
+    Output(download_component, "data"),
+    Input(download_button, "n_clicks"),
    
-#     prevent_initial_call=True)
+    prevent_initial_call=True)
 
 
-# def download_data(n_clicks):
-#    if n_clicks is None:
-#      return None 
+def download_data(n_clicks):
+   if n_clicks is None:
+     return None 
    
-#    excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
-
-#    return dcc.send_file("houses_antioquia.xlsx")
-
+   excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
+   return dcc.send_file("houses_antioquia.xlsx")
 
 
 
