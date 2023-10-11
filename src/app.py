@@ -15,9 +15,6 @@ import re
 import os
 
 # Cambia al directorio donde se encuentra el script
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-
 
 
 data_historica=pd.read_csv("data_contatenada.csv", sep=',')
