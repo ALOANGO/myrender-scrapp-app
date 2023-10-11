@@ -57,8 +57,9 @@ app.layout = html.Div(
     prevent_initial_call=True,
 )
 def download_data(n_clicks, data):
-    data_historica = pd.DataFrame(data)
-    return dcc.send_data_frame(data_historica.to_excel, "filtered_xlsx.xlsx")
+    excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
+    return dcc.send_file("houses_antioquia.xlsx")
+
 
 
 if __name__ == "__main__":
