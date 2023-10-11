@@ -1,49 +1,53 @@
 import dash
 import pandas as pd
 from dash import Dash, dash_table, dcc, html, Input, Output, State
+import dash_bootstrap_components as dbc
 import plotly.express as px
+from fincaprueba import fincaraiz
+from metrocuadrado import metrocuadrado
+from realityserver import realityserver
+from lonja import lonja
+import openpyxl
+from datetime import date
+from bs4 import BeautifulSoup
+import dash_bootstrap_components as dbc
+import re
 
 app = Dash(__name__)
 server = app.server
 
-df = px.data.gapminder()
+data_historica=pd.read_csv("data_contatenada.csv", sep=',')
 
-range_slider = dcc.RangeSlider(
-    value=[1987, 2007],
-    step=5,
-    marks={i: str(i) for i in range(1952, 2012, 5)},
-)
 
-dtable = dash_table.DataTable(
-    columns=[{"name": i, "id": i} for i in sorted(df.columns)],
-    sort_action="native",
-    page_size=10,
-    style_table={"overflowX": "auto"},
-)
 
-download_button = html.Button("Download Filtered CSV", style={"marginTop": 20})
+dtable = dash_table.DataTable(id='datascraping',
+        columns=[{"name": i, "id": i} for i in (data_historica.columns)],
+        data=data_historica.to_dict('records'),
+        sort_action="native",
+        sort_mode="multi",
+        row_selectable="multi",
+        filter_action="native",
+        style_cell={"textAlign":"left", 
+                    'whiteSpace': 'normal',
+                    'height': 'auto', 
+                    'lineHeight': '15px',
+                    #'minWidth': '180px', 'width': '180px', 'maxWidth': '180px'},
+        },
+        style_cell_conditional=[{'if':{'column_id':'descripcion'},'width':'10%'}],
+        page_size=10)                                                                                    
+
+
+download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
 
 app.layout = html.Div(
     [
-        html.H2("Gapminder Data Download", style={"marginBottom": 20}),
+        html.H2('MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}),
         download_component,
-        range_slider,
         download_button,
         dtable,
     ]
 )
-
-
-@app.callback(
-    Output(dtable, "data"),
-    Input(range_slider, "value"),
-)
-def update_table(slider_value):
-    if not slider_value:
-        return dash.no_update
-    dff = df[df.year.between(slider_value[0], slider_value[1])]
-    return dff.to_dict("records")
 
 
 @app.callback(
@@ -53,8 +57,8 @@ def update_table(slider_value):
     prevent_initial_call=True,
 )
 def download_data(n_clicks, data):
-    dff = pd.DataFrame(data)
-    return dcc.send_data_frame(dff.to_csv, "filtered_csv.csv")
+    data_historica = pd.DataFrame(data)
+    return dcc.send_data_frame(data_historica.to_csv, "filtered_csv.csv")
 
 
 if __name__ == "__main__":
