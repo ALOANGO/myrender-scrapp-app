@@ -25,7 +25,7 @@ dtable = dash_table.DataTable(id='datascraping',
         data=data_historica.to_dict('records'),
         sort_action="native",
         sort_mode="multi",
-        row_selectable="multi",
+        
         filter_action="native",
         style_cell={"textAlign":"left", 
                     'whiteSpace': 'normal',
@@ -53,12 +53,12 @@ app.layout = html.Div(
 @app.callback(
     Output(download_component, "data"),
     Input(download_button, "n_clicks"),
-    State(dtable, "derived_virtual_data"),
+   
     prevent_initial_call=True,
 )
-def download_data(n_clicks, data):
-    excel_data = data_historica.to_excel("houses_antioquia.xlsx", index=False)
-    return dcc.send_file("houses_antioquia.xlsx")
+def download_data(n_clicks):
+    
+    return dcc.send_data_frame(data_historica.to_excel, "mydf_excel.xlsx", sheet_name="Sheet_name_1")
 
 
 
