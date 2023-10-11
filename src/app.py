@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import dash_bootstrap_components as dbc
 import re
 
-app = Dash(__name__)
+app = Dash(__name__,  external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
 data_historica=pd.read_csv("data_contatenada.csv", sep=',')
@@ -24,7 +24,6 @@ dtable = dash_table.DataTable(id='datascraping',
         columns=[{"name": i, "id": i} for i in (data_historica.columns)],
         data=data_historica.to_dict('records'),
         sort_action="native",
-        sort_mode="multi",
         
         filter_action="native",
         style_cell={"textAlign":"left", 
@@ -39,15 +38,73 @@ dtable = dash_table.DataTable(id='datascraping',
 
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
+cantidad= dcc.Markdown(id="cantidad-markdown", style={"text-align": "center"})
+actualiza_button=html.Button("Actualizar tabla", id="actualiza-button",  style={"marginTop": 20})
 
-app.layout = html.Div(
-    [
-        html.H2('MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}),
+#___________________________________________________________________________________________________________________
+
+# #3-Mete los componentes a la pagina (layout)
+
+app.layout =dbc.Container([ 
+    
+        dcc.Markdown('# MURILLO PROPIEDADES - VENTA DE VIVIENDAS EN ANTIOQUIA', style={"text-align": "center"}), 
+        cantidad,
+         
+        dbc.Label("Numero de filas"),
+        row_drop := dcc.Dropdown(value=10, clearable=False, style={'width':'35%'},
+                             options=[10, 25, 50, 100]),
+
         download_component,
         download_button,
-        dtable,
-    ]
+        actualiza_button, 
+                           
+                       
+
+        dbc.Row([
+            dbc.Col([
+                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(data_historica.tipopropiedad.unique())])
+            ], style={'width': "40%"}),
+
+            dbc.Col([
+            fuente_drop := dcc.Dropdown([x for x in sorted(data_historica.fuente.unique())], multi=True)
+            ], style={'width': "40%"}),
+
+            ],justify="between", className='mt-3 mb-4') ,
+
+            dtable,
+            
+            
+            ])
+
+#__________________________________________________________________________________________
+# #4-callbacks (juntar componentes con los datos)
+
+@app.callback(
+    Output(dtable, "data"),
+    Output(dtable, 'page_size'),
+    Output("cantidad-markdown", 'children'),
+
+    Input(tipopropiedad_drop, 'value'),
+    Input(fuente_drop, 'value'),
+    Input(row_drop, 'value')
 )
+
+def update_dropdown_options(tipop_v, fuent_v, row_v):
+    copia_data= data_historica.copy()
+
+    if tipop_v:
+        copia_data = copia_data[copia_data.tipopropiedad==tipop_v]
+    if fuent_v:
+        copia_data = copia_data[copia_data.fuente.isin(fuent_v)]
+
+    cantidad_text= f'''REGISTROS: {copia_data.shape}'''
+
+    return copia_data.to_dict('records'), row_v, cantidad_text
+
+
+
+
+
 
 
 @app.callback(
@@ -58,8 +115,7 @@ app.layout = html.Div(
 )
 def download_data(n_clicks):
     
-    return dcc.send_data_frame(data_historica.to_excel, "mydf_excel.xlsx", sheet_name="Sheet_name_1")
-
+    return dcc.send_data_frame(data_historica.to_csv, "Scrap_Antioquia.csv")
 
 
 if __name__ == "__main__":
