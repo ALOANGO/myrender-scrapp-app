@@ -13,16 +13,36 @@ from bs4 import BeautifulSoup
 import dash_bootstrap_components as dbc
 import re
 
+
+
+
+data_historica=pd.read_csv("data_contatenada.csv", sep=',')
+#EXTRAER DATA WEB SCRAPP
+df1=fincaraiz()
+df2=metrocuadrado()
+df3=realityserver()
+df4=lonja()
+
+
+
+#CONCATENAR DATA
+df_total=pd.concat([data_historica,df1,df2,df3, df4])
+df_total.drop_duplicates(['idpropiedad'], inplace=True)
+df_total.reset_index(drop=True, inplace=True)
+
+df_total.to_csv("data_contatenada.csv", index=False)
+
+
 app = Dash(__name__,  external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-data_historica=pd.read_csv("data_contatenada.csv", sep=',')
+
 
 
 
 dtable = dash_table.DataTable(id='datascraping',
-        columns=[{"name": i, "id": i} for i in (data_historica.columns)],
-        data=data_historica.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in (df_total.columns)],
+        data=df_total.to_dict('records'),
         sort_action="native",
         editable=True,
         filter_action="native",
@@ -35,7 +55,7 @@ dtable = dash_table.DataTable(id='datascraping',
         style_cell_conditional=[{'if':{'column_id':'descripcion'},'width':'10%'}],
         page_size=10)   
 
-tabla_container=html.Div(id="table-container")
+#tabla_container=html.Div(id="table-container")
 
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
@@ -63,16 +83,16 @@ app.layout =dbc.Container([
 
         dbc.Row([
             dbc.Col([
-                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(data_historica.tipopropiedad.unique())])
+                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(df_total.tipopropiedad.unique())])
             ], style={'width': "40%"}),
 
             dbc.Col([
-            fuente_drop := dcc.Dropdown([x for x in sorted(data_historica.fuente.unique())], multi=True)
+            fuente_drop := dcc.Dropdown([x for x in sorted(df_total.fuente.unique())], multi=True)
             ], style={'width': "40%"}),
 
             ],justify="between", className='mt-3 mb-4') ,
 
-            tabla_container,
+            #tabla_container,
             dtable,
             
             
@@ -83,33 +103,33 @@ app.layout =dbc.Container([
 # #4-callbacks (juntar componentes con los datos)
 
 
-#ACTUALIZAR TABLA
-@app.callback(
-    Output("table-container", "children"),
-    Input("actualiza-button", "n_clicks"))
+# #ACTUALIZAR TABLA
+# @app.callback(
+#     Output("table-container", "children"),
+#     Input("actualiza-button", "n_clicks"))
 
-def actualiza_table(n_clicks):
+# def actualiza_table(n_clicks):
 
-    if n_clicks is None:
-        return dash.no_update  # No actualiza la salida si aún no se ha hecho click
+#     if n_clicks is None:
+#         return dash.no_update  # No actualiza la salida si aún no se ha hecho click
     
-    #EXTRAER DATA WEB SCRAPP
-    df1=fincaraiz()
-    df2=metrocuadrado()
-    df3=realityserver()
-    df4=lonja()
-    
-
-
-    #CONCATENAR DATA
-    df_total=pd.concat([data_historica,df1,df2,df3, df4])
-    df_total.drop_duplicates(['idpropiedad'], inplace=True)
-    df_total.reset_index(drop=True, inplace=True)
-
-    df_total.to_csv("data_contatenada.csv", index=False)
+#     #EXTRAER DATA WEB SCRAPP
+#     df1=fincaraiz()
+#     df2=metrocuadrado()
+#     df3=realityserver()
+#     df4=lonja()
     
 
-    return df_total.to_dict('records')
+
+#     #CONCATENAR DATA
+#     df_total=pd.concat([data_historica,df1,df2,df3, df4])
+#     df_total.drop_duplicates(['idpropiedad'], inplace=True)
+#     df_total.reset_index(drop=True, inplace=True)
+
+#     df_total.to_csv("data_contatenada.csv", index=False)
+    
+
+#     return df_total.to_dict('records')
 
 
 
@@ -127,7 +147,7 @@ def actualiza_table(n_clicks):
 )
 
 def update_dropdown_options(tipop_v, fuent_v, row_v):
-    copia_data= data_historica.copy()
+    copia_data= df_total.copy()
 
     if tipop_v:
         copia_data = copia_data[copia_data.tipopropiedad==tipop_v]
