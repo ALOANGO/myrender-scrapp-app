@@ -60,7 +60,7 @@ dtable = dash_table.DataTable(id='datascraping',
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
 cantidad= dcc.Markdown(id="cantidad-markdown", style={"text-align": "center"})
-actualiza_button=html.Button("Actualizar tabla", id="actualiza-button",  style={"marginTop": 20})
+#actualiza_button=html.Button("Actualizar tabla", id="actualiza-button",  style={"marginTop": 20})
 
 #___________________________________________________________________________________________________________________
 
@@ -77,7 +77,7 @@ app.layout =dbc.Container([
 
         download_component,
         download_button,
-        actualiza_button, 
+        #actualiza_button, 
                            
                        
 
