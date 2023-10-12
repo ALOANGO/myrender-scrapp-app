@@ -24,7 +24,7 @@ dtable = dash_table.DataTable(id='datascraping',
         columns=[{"name": i, "id": i} for i in (data_historica.columns)],
         data=data_historica.to_dict('records'),
         sort_action="native",
-        
+        editable=True,
         filter_action="native",
         style_cell={"textAlign":"left", 
                     'whiteSpace': 'normal',
@@ -33,8 +33,9 @@ dtable = dash_table.DataTable(id='datascraping',
                     #'minWidth': '180px', 'width': '180px', 'maxWidth': '180px'},
         },
         style_cell_conditional=[{'if':{'column_id':'descripcion'},'width':'10%'}],
-        page_size=10)                                                                                    
+        page_size=10)   
 
+tabla_container=html.Div(id="table-container")
 
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
@@ -71,7 +72,9 @@ app.layout =dbc.Container([
 
             ],justify="between", className='mt-3 mb-4') ,
 
+            tabla_container,
             dtable,
+            
             
             
             ])
@@ -79,6 +82,40 @@ app.layout =dbc.Container([
 #__________________________________________________________________________________________
 # #4-callbacks (juntar componentes con los datos)
 
+
+#ACTUALIZAR TABLA
+@app.callback(
+    Output("table-container", "children"),
+    Input("actualiza-button", "n_clicks"))
+
+def actualiza_table(n_clicks):
+
+    if n_clicks is None:
+        return dash.no_update  # No actualiza la salida si aún no se ha hecho click
+    
+    #EXTRAER DATA WEB SCRAPP
+    df1=fincaraiz()
+    df2=metrocuadrado()
+    df3=realityserver()
+    df4=lonja()
+    
+
+
+    #CONCATENAR DATA
+    df_total=pd.concat([data_historica,df1,df2,df3, df4])
+    df_total.drop_duplicates(['idpropiedad'], inplace=True)
+    df_total.reset_index(drop=True, inplace=True)
+
+    df_total.to_csv("data_contatenada.csv", index=False)
+    
+
+    return df_total.to_dict('records')
+
+
+
+
+
+#FILTRAR TABLA
 @app.callback(
     Output(dtable, "data"),
     Output(dtable, 'page_size'),
@@ -104,8 +141,7 @@ def update_dropdown_options(tipop_v, fuent_v, row_v):
 
 
 
-
-
+#DESCARGAR DATA
 
 @app.callback(
     Output(download_component, "data"),
@@ -114,8 +150,13 @@ def update_dropdown_options(tipop_v, fuent_v, row_v):
     prevent_initial_call=True,
 )
 def download_data(n_clicks):
+    if n_clicks is None:
+     return None
     
     return dcc.send_data_frame(data_historica.to_csv, "Scrap_Antioquia.csv")
+
+
+
 
 
 if __name__ == "__main__":

@@ -234,4 +234,13 @@ def realityserver():
         dfdefinit.drop_duplicates(['idpropiedad'], inplace=True)
         dfdefinit.reset_index(drop=True, inplace=True)
 
+        def format_currency(value):
+            try:
+                return '${:,.0f}'.format(float(value))
+            except (ValueError, TypeError):
+                return value  # Devuelve el valor original si no se puede convertir a un número
+        
+        dfdefinit["precio"]=dfdefinit["precio"].apply(format_currency)
+        dfdefinit["tipopropiedad"]=dfdefinit["tipopropiedad"].str.strip()
+
         return dfdefinit

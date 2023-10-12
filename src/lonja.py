@@ -151,5 +151,14 @@ def lonja():
 
         consolidado["precio"]=pd.to_numeric(consolidado["precio"], errors='ignore')
         
+        def format_currency(value):
+            try:
+                return '${:,.0f}'.format(float(value))
+            except (ValueError, TypeError):
+                return value  # Devuelve el valor original si no se puede convertir a un número
+        
+        consolidado["precio"]=consolidado["precio"].apply(format_currency)
+        consolidado["tipopropiedad"]=consolidado["tipopropiedad"].str.strip()
+        
 
         return consolidado

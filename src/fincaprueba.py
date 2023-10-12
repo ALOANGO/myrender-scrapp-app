@@ -284,4 +284,13 @@ def fincaraiz():
                       dfa.drop_duplicates(['idpropiedad'], inplace=True)
                       dfa.reset_index(drop=True, inplace=True)
 
+                      def format_currency(value):
+                          try:
+                              return '${:,.0f}'.format(float(value))
+                          except (ValueError, TypeError):
+                              return value  # Devuelve el valor original si no se puede convertir a un número
+        
+                      dfa["precio"]=dfa["precio"].apply(format_currency)
+                      dfa["tipopropiedad"]=dfa["tipopropiedad"].str.strip()
+
                       return dfa
