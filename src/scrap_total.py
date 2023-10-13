@@ -15,7 +15,7 @@ from lonja import lonja
 
 def scrap_total():
 
-    data_historica=pd.read_csv("src\data_contatenada.csv", sep=',')
+    data_historica=pd.read_csv("src/data_contatenada.csv", sep=',')
 
     #EXTRAER DATA WEB SCRAPP
     df1=fincaraiz()
@@ -31,6 +31,6 @@ def scrap_total():
 
     data_historica["tipopropiedad"]=data_historica["tipopropiedad"].str.strip()
 
-    data_historica.to_csv("src\data_contatenada.csv", index=False)
+    data_historica.to_csv("src/data_contatenada.csv", index=False)
 
     return data_historica
