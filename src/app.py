@@ -1,9 +1,12 @@
 import dash
 import pandas as pd
-from dash import Dash, dash_table, dcc, html, Input, Output, State,Patch
+from dash import Dash, dash_table, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from scrap_total import scrap_total
+from fincaprueba import fincaraiz
+from metrocuadrado import metrocuadrado
+from realityserver import realityserver
+from lonja import lonja
 from datetime import date
 from bs4 import BeautifulSoup
 import dash_bootstrap_components as dbc
@@ -11,9 +14,22 @@ import re
 
 
 
+#EXTRAER DATA WEB SCRAPP
+df1=fincaraiz()
+df2=metrocuadrado()
+df3=realityserver()
+df4=lonja()
+data_historica=pd.read_csv("data_contatenada.csv", sep=",")
 
-data_historica=scrap_total()
 
+#CONCATENAR DATA
+df_total=pd.concat([data_historica,df1,df2,df3, df4])
+df_total.drop_duplicates(['idpropiedad'], inplace=True)
+df_total.reset_index(drop=True, inplace=True)
+df_total["tipopropiedad"]=df_total["tipopropiedad"].str.strip()
+
+df_total.to_csv("data_contatenada.csv", index=False)
+#1- inicializo la app
 
 
 app = Dash(__name__,  external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -23,8 +39,8 @@ server = app.server
 
 
 dtable = dash_table.DataTable(id='datascraping',
-        columns=[{"name": i, "id": i} for i in (data_historica.columns)],
-        data=data_historica.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in (df_total.columns)],
+        data=df_total.to_dict('records'),
         sort_action="native",
         editable=True,
         filter_action="native",
@@ -42,7 +58,7 @@ dtable = dash_table.DataTable(id='datascraping',
 download_button =html.Button("Download Excel", style={"marginTop": 20})
 download_component = dcc.Download()
 cantidad= dcc.Markdown(id="cantidad-markdown", style={"text-align": "center"})
-actualiza_button=html.Button("Actualizar tabla", id="actualiza-button",  style={"marginTop": 20})
+#actualiza_button=html.Button("Actualizar tabla", id="actualiza-button",  style={"marginTop": 20})
 
 #___________________________________________________________________________________________________________________
 
@@ -59,17 +75,17 @@ app.layout =dbc.Container([
 
         download_component,
         download_button,
-        actualiza_button, 
+        #actualiza_button, 
                            
                        
 
         dbc.Row([
             dbc.Col([
-                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(data_historica.tipopropiedad.unique())])
+                tipopropiedad_drop := dcc.Dropdown([x for x in sorted(df_total.tipopropiedad.unique())])
             ], style={'width': "40%"}),
 
             dbc.Col([
-            fuente_drop := dcc.Dropdown([x for x in sorted(data_historica.fuente.unique())], multi=True)
+            fuente_drop := dcc.Dropdown([x for x in sorted(df_total.fuente.unique())], multi=True)
             ], style={'width': "40%"}),
 
             ],justify="between", className='mt-3 mb-4') ,
@@ -84,6 +100,34 @@ app.layout =dbc.Container([
 #__________________________________________________________________________________________
 # #4-callbacks (juntar componentes con los datos)
 
+
+# #ACTUALIZAR TABLA
+# @app.callback(
+#     Output('datascraping', "data",allow_duplicate=True),
+#     Output("cantidad-markdown", 'children',allow_duplicate=True),
+#     Input("actualiza-button", "n_clicks"), prevent_initial_call=True)
+
+# def actualiza_table(n_clicks):
+#     if n_clicks is None:
+#             return dash.no_update  # No actualiza la salida si aún no se ha hecho click
+    
+#     patched_table = Patch()
+#     #EXTRAER DATA WEB SCRAPP
+#     df1=fincaraiz()
+#     df2=metrocuadrado()
+#     df3=realityserver()
+#     df4=lonja()
+    
+#     #CONCATENAR DATA
+#     copia_data= data_historica.copy()
+#     copia_data=pd.concat([copia_data,df1,df2,df3, df4])
+#     copia_data.drop_duplicates(['idpropiedad'], inplace=True)
+#     copia_data.reset_index(drop=True, inplace=True)
+
+#     copia_data.to_csv("data_contatenada.csv", index=False)
+    
+
+
 #FILTRAR TABLA
 @app.callback(
     Output(dtable, "data"),
@@ -95,7 +139,7 @@ app.layout =dbc.Container([
     Input(row_drop, 'value'))
 
 def update_dropdown_options(tipop_v, fuent_v, row_v):
-    copia_data= data_historica.copy()
+    copia_data= df_total.copy()
 
     if tipop_v:
         copia_data = copia_data[copia_data.tipopropiedad==tipop_v]
@@ -119,7 +163,7 @@ def download_data(n_clicks):
     if n_clicks is None:
      return None
     
-    return dcc.send_data_frame(data_historica.to_csv, "Scrap_Antioquia.csv")
+    return dcc.send_data_frame(df_total.to_csv, "Scrap_Antioquia.csv", index=False)
 
 
 
@@ -127,5 +171,3 @@ def download_data(n_clicks):
 
 if __name__ == "__main__":
     app.run_server(debug=False)
-
-
