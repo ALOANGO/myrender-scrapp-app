@@ -158,7 +158,7 @@ def lonja():
                 return value  # Devuelve el valor original si no se puede convertir a un número
         
         consolidado["precio"]=consolidado["precio"].apply(format_currency)
-        consolidado["tipopropiedad"]=consolidado["tipopropiedad"].str.strip()
+        
         
 
         return consolidado

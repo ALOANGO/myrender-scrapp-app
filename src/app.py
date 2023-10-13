@@ -3,11 +3,7 @@ import pandas as pd
 from dash import Dash, dash_table, dcc, html, Input, Output, State,Patch
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from fincaprueba import fincaraiz
-from metrocuadrado import metrocuadrado
-from realityserver import realityserver
-from lonja import lonja
-import openpyxl
+from scrap_total import scrap_total
 from datetime import date
 from bs4 import BeautifulSoup
 import dash_bootstrap_components as dbc
@@ -16,7 +12,7 @@ import re
 
 
 
-data_historica=pd.read_csv("data_contatenada.csv", sep=',')
+data_historica=scrap_total()
 
 
 
@@ -88,52 +84,15 @@ app.layout =dbc.Container([
 #__________________________________________________________________________________________
 # #4-callbacks (juntar componentes con los datos)
 
-
-# #ACTUALIZAR TABLA
-@app.callback(
-    Output('datascraping', "data",allow_duplicate=True),
-    Output("cantidad-markdown", 'children',allow_duplicate=True),
-    Input("actualiza-button", "n_clicks"), prevent_initial_call=True)
-
-def actualiza_table(n_clicks):
-    if n_clicks is None:
-            return dash.no_update  # No actualiza la salida si aún no se ha hecho click
-    
-    patched_table = Patch()
-    #EXTRAER DATA WEB SCRAPP
-    df1=fincaraiz()
-    df2=metrocuadrado()
-    df3=realityserver()
-    df4=lonja()
-    
-    #CONCATENAR DATA
-    copia_data= data_historica.copy()
-    copia_data=pd.concat([copia_data,df1,df2,df3, df4])
-    copia_data.drop_duplicates(['idpropiedad'], inplace=True)
-    copia_data.reset_index(drop=True, inplace=True)
-
-    copia_data.to_csv("data_contatenada.csv", index=False)
-    
-    
-
-    patched_table.extend(copia_data.to_dict("records"))
-    cantidad_text= f'''REGISTROS: {copia_data.shape}'''
-
-    return patched_table, cantidad_text
-    
-
-
-
 #FILTRAR TABLA
 @app.callback(
     Output(dtable, "data"),
-    Output(dtable, 'page_size'),
+    Output(dtable, "page_size"),
     Output("cantidad-markdown", 'children'),
 
     Input(tipopropiedad_drop, 'value'),
     Input(fuente_drop, 'value'),
-    Input(row_drop, 'value')
-)
+    Input(row_drop, 'value'))
 
 def update_dropdown_options(tipop_v, fuent_v, row_v):
     copia_data= data_historica.copy()
@@ -146,11 +105,6 @@ def update_dropdown_options(tipop_v, fuent_v, row_v):
     cantidad_text= f'''REGISTROS: {copia_data.shape}'''
 
     return copia_data.to_dict('records'), row_v, cantidad_text
-
-
-
-
-
 
 
 #DESCARGAR DATA
