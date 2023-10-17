@@ -13,7 +13,7 @@ import re
 
 
 
-data_historica=scrap_total()
+data_historica=pd.read_csv("data_contatenada.csv", sep=",")
 
 
 
